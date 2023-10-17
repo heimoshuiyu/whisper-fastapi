@@ -1,0 +1,5 @@
+python-multipart
+fastapi
+uvicorn
+whisper_ctranslate2
+opencc
