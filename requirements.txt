@@ -4,3 +4,4 @@ uvicorn[standard]
 whisper_ctranslate2
 opencc
 prometheus-fastapi-instrumentator
+pydub
