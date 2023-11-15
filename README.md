@@ -42,7 +42,7 @@ pip install -r requirements.txt
 You can then run the application using the following command: (model will be download from huggingface if not exists in cache dir)
 
 ```bash
-python main.py --host 0.0.0.0 --port 5000 --model large-v2
+python whisper_fastapi.py --host 0.0.0.0 --port 5000 --model large-v2
 ```
 
 This will start the application on `http://<your-ip-address>:5000`.
