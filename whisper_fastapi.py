@@ -3,7 +3,7 @@ import io
 import hashlib
 import argparse
 import uvicorn
-from typing import Any
+from typing import Any, Literal
 from fastapi import File, UploadFile, Form, FastAPI, Request, WebSocket, Response
 from fastapi.middleware.cors import CORSMiddleware
 from src.whisper_ctranslate2.whisper_ctranslate2 import Transcribe, TranscriptionOptions
@@ -112,6 +112,7 @@ def get_options(*, initial_prompt=""):
 @app.websocket("/konele/ws")
 async def konele_ws(
     websocket: WebSocket,
+    task: Literal["transcribe", "translate"] = "transcribe",
     lang: str = "und",
 ):
     await websocket.accept()
@@ -143,9 +144,8 @@ async def konele_ws(
 
     result = transcriber.inference(
         audio=file_obj,
-        # Enter translate mode if target language is English
-        task="translate" if lang == "en-US" else "transcribe",
-        language=None,  # type: ignore
+        task=task,
+        language=lang if lang != "und" else None,  # type: ignore
         verbose=False,
         live=False,
         options=options,
@@ -168,6 +168,7 @@ async def konele_ws(
 @app.post("/konele/post")
 async def translateapi(
     request: Request,
+    task: Literal["transcribe", "translate"] = "transcribe",
     lang: str = "und",
 ):
     content_type = request.headers.get("Content-Type", "")
@@ -196,9 +197,8 @@ async def translateapi(
 
     result = transcriber.inference(
         audio=file_obj,
-        # Enter translate mode if target language is English
-        task="translate" if lang == "en-US" else "transcribe",
-        language=None,  # type: ignore
+        task=task,
+        language=lang if lang != "und" else None,  # type: ignore
         verbose=False,
         live=False,
         options=options,
