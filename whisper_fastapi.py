@@ -58,8 +58,12 @@ def generate_tsv(result: dict[str, list[Any]]):
 def generate_srt(result: dict[str, list[Any]]):
     srt = ""
     for i, segment in enumerate(result["segments"], start=1):
-        start_time = format_timestamp(segment["start"])
-        end_time = format_timestamp(segment["end"])
+        start_time = format_timestamp(
+            segment["start"], decimal_marker=",", always_include_hours=True
+        )
+        end_time = format_timestamp(
+            segment["end"], decimal_marker=",", always_include_hours=True
+        )
         text = segment["text"]
         srt += f"{i}\n{start_time} --> {end_time}\n{text}\n\n"
     return srt
@@ -234,13 +238,16 @@ async def transcription(
     )
 
     if response_format == "json":
-        return Response(content=result, media_type="application/json")
+        return result
     elif response_format == "text":
-        return Response(content='\n'.join(s['text'] for s in result['segments']), media_type="plain/text")
+        return Response(
+            content="\n".join(s["text"] for s in result["segments"]),
+            media_type="plain/text",
+        )
     elif response_format == "tsv":
-        return Response(content=generate_tsv(result), media_type='plain_text')
+        return Response(content=generate_tsv(result), media_type="plain_text")
     elif response_format == "srt":
-        return Response(content=generate_srt(result), media_type='plain_text')
+        return Response(content=generate_srt(result), media_type="plain_text")
     elif response_format == "vtt":
         return generate_vtt(result)
 
