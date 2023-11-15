@@ -1,6 +1,6 @@
 python-multipart
 fastapi
-uvicorn
+uvicorn[standard]
 whisper_ctranslate2
 opencc
 prometheus-fastapi-instrumentator

@@ -109,6 +109,15 @@ def get_options(*, initial_prompt=""):
     return options
 
 
+@app.websocket("/konele/status")
+async def konele_status(
+    websocket: WebSocket,
+):
+    await websocket.accept()
+    await websocket.send_json(dict(num_workers_available=1))
+    await websocket.close()
+
+
 @app.websocket("/konele/ws")
 async def konele_ws(
     websocket: WebSocket,
