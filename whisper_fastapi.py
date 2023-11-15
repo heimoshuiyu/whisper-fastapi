@@ -109,6 +109,7 @@ def get_options(*, initial_prompt=""):
     return options
 
 
+@app.websocket("/k6nele/status")
 @app.websocket("/konele/status")
 async def konele_status(
     websocket: WebSocket,
@@ -118,6 +119,7 @@ async def konele_status(
     await websocket.close()
 
 
+@app.websocket("/k6nele/ws")
 @app.websocket("/konele/ws")
 async def konele_ws(
     websocket: WebSocket,
@@ -174,6 +176,7 @@ async def konele_ws(
     await websocket.close()
 
 
+@app.post("/k6nele/post")
 @app.post("/konele/post")
 async def translateapi(
     request: Request,
