@@ -1,4 +1,3 @@
-from faster_whisper import vad
 import tqdm
 import json
 from fastapi.responses import StreamingResponse
