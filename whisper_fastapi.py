@@ -27,9 +27,11 @@ from prometheus_fastapi_instrumentator import Instrumentator
 parser = argparse.ArgumentParser()
 parser.add_argument("--host", default="0.0.0.0", type=str)
 parser.add_argument("--port", default=5000, type=int)
-parser.add_argument("--model", default="large-v2", type=str)
+parser.add_argument("--model", default="large-v3", type=str)
 parser.add_argument("--device", default="auto", type=str)
 parser.add_argument("--cache_dir", default=None, type=str)
+parser.add_argument("--local_files_only", default=False, type=bool)
+parser.add_argument("--threads", default=4, type=int)
 args = parser.parse_args()
 app = FastAPI()
 # Instrument your app with default metrics and expose the metrics
@@ -41,9 +43,9 @@ transcriber = Transcribe(
     device=args.device,
     device_index=0,
     compute_type="default",
-    threads=1,
+    threads=args.threads,
     cache_directory=args.cache_dir,
-    local_files_only=False,
+    local_files_only=args.local_files_only,
 )
 print("Model loaded!")
 
