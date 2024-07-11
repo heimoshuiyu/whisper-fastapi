@@ -126,6 +126,7 @@ def stream_builder(
         language=language,
         task=task,
         initial_prompt=initial_prompt,
+        word_timestamps=True,
     )
     print(
         "Detected language '%s' with probability %f"
@@ -139,6 +140,8 @@ def stream_builder(
                 pbar.update(end - last_pos)
                 last_pos = end
                 data = segment._asdict()
+                if data.get('words') is not None:
+                    data["words"] = [i._asdict() for i in data["words"]]
                 data["total"] = info.duration
                 yield data
     
