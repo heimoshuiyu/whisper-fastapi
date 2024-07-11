@@ -297,6 +297,7 @@ async def transcription(
     task: str = Form("transcribe"),
     language: str = Form("und"),
     vad_filter: bool = Form(False),
+    repetition_penalty: float = Form(1.0),
 ):
     """Transcription endpoint
 
@@ -309,6 +310,7 @@ async def transcription(
         task=task,
         vad_filter=vad_filter,
         language=None if language == "und" else language,
+        repetition_penalty=repetition_penalty,
     )
 
     # special function for streaming response (OpenAI API does not have this)
