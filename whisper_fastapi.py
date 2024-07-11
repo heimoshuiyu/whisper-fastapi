@@ -120,6 +120,7 @@ def stream_builder(
     vad_filter: bool,
     language: str | None,
     initial_prompt: str = "",
+    repetition_penalty: float = 1.0,
 ) -> Tuple[Iterable[Segment], TranscriptionInfo]:
     segments, info = transcriber.model.transcribe(
         audio=audio,
@@ -127,6 +128,7 @@ def stream_builder(
         task=task,
         initial_prompt=initial_prompt,
         word_timestamps=True,
+        repetition_penalty=repetition_penalty,
     )
     print(
         "Detected language '%s' with probability %f"
