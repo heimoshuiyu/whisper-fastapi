@@ -103,14 +103,12 @@ def vtt_writer(generator: Generator[dict[str, Any], Any, None]):
 
 def build_json_result(
     generator: Iterable[Segment],
-    info:  TranscriptionInfo,
+    info:  dict,
 ) -> dict[str, Any]:
     segments = [i for i in generator]
-    return {
+    return info | {
         "text": "\n".join(i["text"] for i in segments),
         "segments": segments,
-        "language": info.language,
-        "language_probability": info.language_probability,
     }
 
 
@@ -121,7 +119,7 @@ def stream_builder(
     language: str | None,
     initial_prompt: str = "",
     repetition_penalty: float = 1.0,
-) -> Tuple[Iterable[Segment], TranscriptionInfo]:
+) -> Tuple[Iterable[dict], dict]:
     segments, info = transcriber.model.transcribe(
         audio=audio,
         language=language,
@@ -144,10 +142,15 @@ def stream_builder(
                 data = segment._asdict()
                 if data.get('words') is not None:
                     data["words"] = [i._asdict() for i in data["words"]]
-                data["total"] = info.duration
                 yield data
+
+    info_dict = info._asdict()
+    if info_dict['transcription_options'] is not None:
+        info_dict['transcription_options'] = info_dict['transcription_options']._asdict()
+    if info_dict['vad_options'] is not None:
+        info_dict['vad_options'] = info_dict['vad_options']._asdict()
     
-    return wrap(), info
+    return wrap(), info_dict
 
 
 @app.websocket("/k6nele/status")
