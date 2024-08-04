@@ -144,7 +144,8 @@ def stream_builder(
                 data = segment._asdict()
                 if data.get('words') is not None:
                     data["words"] = [i._asdict() for i in data["words"]]
-                data["text"] = ccc.convert(data["text"])
+                if info.language == "zh":
+                    data["text"] = ccc.convert(data["text"])
                 yield data
 
     info_dict = info._asdict()
