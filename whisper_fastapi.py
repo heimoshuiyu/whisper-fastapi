@@ -182,15 +182,11 @@ async def konele_ws(
     # convert lang code format (eg. en-US to en)
     lang = lang.split("-")[0]
 
-    print("WebSocket client connected, lang is", lang)
-    print("content-type is", content_type)
     data = b""
     while True:
         try:
             data += await websocket.receive_bytes()
-            print("Received data:", len(data), data[-10:])
             if data[-3:] == b"EOS":
-                print("End of speech")
                 break
         except:
             break
@@ -223,7 +219,6 @@ async def konele_ws(
     result = build_json_result(generator, info)
 
     text = result.get("text", "")
-    print("result", text)
 
     await websocket.send_json(
         {
@@ -246,14 +241,12 @@ async def translateapi(
     vad_filter: bool = False,
 ):
     content_type = request.headers.get("Content-Type", "")
-    print("downloading request file", content_type)
 
     # convert lang code format (eg. en-US to en)
     lang = lang.split("-")[0]
 
     splited = [i.strip() for i in content_type.split(",") if "=" in i]
     info = {k: v for k, v in (i.split("=") for i in splited)}
-    print(info)
 
     channels = int(info.get("channels", "1"))
     rate = int(info.get("rate", "16000"))
@@ -287,7 +280,6 @@ async def translateapi(
     result = build_json_result(generator, info)
 
     text = result.get("text", "")
-    print("result", text)
 
     return {
         "status": 0,
