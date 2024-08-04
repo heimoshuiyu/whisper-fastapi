@@ -213,14 +213,14 @@ async def konele_ws(
 
     file_obj.seek(0)
 
-    generator = stream_builder(
+    generator, info = stream_builder(
         audio=file_obj,
         task=task,
         vad_filter=vad_filter,
         language=None if lang == "und" else lang,
         initial_prompt=initial_prompt,
     )
-    result = build_json_result(generator)
+    result = build_json_result(generator, info)
 
     text = result.get("text", "")
     print("result", text)
@@ -277,14 +277,14 @@ async def translateapi(
 
     file_obj.seek(0)
 
-    generator = stream_builder(
+    generator, info = stream_builder(
         audio=file_obj,
         task=task,
         vad_filter=vad_filter,
         language=None if lang == "und" else lang,
         initial_prompt=initial_prompt,
     )
-    result = build_json_result(generator)
+    result = build_json_result(generator, info)
 
     text = result.get("text", "")
     print("result", text)
@@ -327,7 +327,7 @@ async def transcription(
             media_type="text/event-stream",
         )
     elif response_format == "json":
-        return build_json_result(generator)
+        return build_json_result(generator, info)
     elif response_format == "text":
         return StreamingResponse(text_writer(generator), media_type="text/plain")
     elif response_format == "tsv":
