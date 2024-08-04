@@ -22,6 +22,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from src.whisper_ctranslate2.whisper_ctranslate2 import Transcribe
 from src.whisper_ctranslate2.writers import format_timestamp
 from faster_whisper.transcribe import Segment, TranscriptionInfo
+import opencc
 from prometheus_fastapi_instrumentator import Instrumentator
 
 parser = argparse.ArgumentParser()
@@ -36,6 +37,7 @@ args = parser.parse_args()
 app = FastAPI()
 # Instrument your app with default metrics and expose the metrics
 Instrumentator().instrument(app).expose(app, endpoint="/konele/metrics")
+ccc = opencc.OpenCC("t2s.json")
 
 print("Loading model...")
 transcriber = Transcribe(
@@ -142,6 +144,7 @@ def stream_builder(
                 data = segment._asdict()
                 if data.get('words') is not None:
                     data["words"] = [i._asdict() for i in data["words"]]
+                data["text"] = ccc.convert(data["text"])
                 yield data
 
     info_dict = info._asdict()
@@ -209,14 +212,14 @@ async def konele_ws(
 
     file_obj.seek(0)
 
-    generator, info = stream_builder(
+    generator = stream_builder(
         audio=file_obj,
         task=task,
         vad_filter=vad_filter,
         language=None if lang == "und" else lang,
         initial_prompt=initial_prompt,
     )
-    result = build_json_result(generator, info)
+    result = build_json_result(generator)
 
     text = result.get("text", "")
     print("result", text)
@@ -273,14 +276,14 @@ async def translateapi(
 
     file_obj.seek(0)
 
-    generator, info = stream_builder(
+    generator = stream_builder(
         audio=file_obj,
         task=task,
         vad_filter=vad_filter,
         language=None if lang == "und" else lang,
         initial_prompt=initial_prompt,
     )
-    result = build_json_result(generator, info)
+    result = build_json_result(generator)
 
     text = result.get("text", "")
     print("result", text)
@@ -323,7 +326,7 @@ async def transcription(
             media_type="text/event-stream",
         )
     elif response_format == "json":
-        return build_json_result(generator, info)
+        return build_json_result(generator)
     elif response_format == "text":
         return StreamingResponse(text_writer(generator), media_type="text/plain")
     elif response_format == "tsv":
