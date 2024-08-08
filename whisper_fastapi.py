@@ -39,7 +39,7 @@ app = FastAPI()
 Instrumentator().instrument(app).expose(app, endpoint="/konele/metrics")
 ccc = opencc.OpenCC("t2s.json")
 
-print("Loading model...")
+print(f"Loading model to device {args.device}...")
 transcriber = Transcribe(
     model_path=args.model,
     device=args.device,
@@ -49,7 +49,7 @@ transcriber = Transcribe(
     cache_directory=args.cache_dir,
     local_files_only=args.local_files_only,
 )
-print("Model loaded!")
+print(f"Model loaded to device {transcriber.model.model.device}")
 
 
 # allow all cors
