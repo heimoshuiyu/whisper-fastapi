@@ -159,6 +159,8 @@ def stream_builder(
 
 @app.websocket("/k6nele/status")
 @app.websocket("/konele/status")
+@app.websocket("/v1/k6nele/status")
+@app.websocket("/v1/konele/status")
 async def konele_status(
     websocket: WebSocket,
 ):
@@ -169,6 +171,8 @@ async def konele_status(
 
 @app.websocket("/k6nele/ws")
 @app.websocket("/konele/ws")
+@app.websocket("/v1/k6nele/ws")
+@app.websocket("/v1/konele/ws")
 async def konele_ws(
     websocket: WebSocket,
     task: Literal["transcribe", "translate"] = "transcribe",
@@ -233,6 +237,8 @@ async def konele_ws(
 
 @app.post("/k6nele/post")
 @app.post("/konele/post")
+@app.post("/v1/k6nele/post")
+@app.post("/v1/konele/post")
 async def translateapi(
     request: Request,
     task: Literal["transcribe", "translate"] = "transcribe",
