@@ -6,5 +6,5 @@ docker run -d --name whisper-fastapi \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     --gpus all \
     -p 5000:5000 \
-    docker.io/heimoshuiyu/whisper-fastapi:lastet \
+    docker.io/heimoshuiyu/whisper-fastapi:latest \
     --model large-v2
