@@ -78,7 +78,7 @@ def tsv_writer(generator: Generator[dict[str, Any], Any, None]):
     for i, segment in enumerate(generator):
         start_time = str(round(1000 * segment["start"]))
         end_time = str(round(1000 * segment["end"]))
-        text = segment["text"]
+        text = segment["text"].strip()
         yield f"{start_time}\t{end_time}\t{text}\n"
 
 
@@ -90,7 +90,7 @@ def srt_writer(generator: Generator[dict[str, Any], Any, None]):
         end_time = format_timestamp(
             segment["end"], decimal_marker=",", always_include_hours=True
         )
-        text = segment["text"]
+        text = segment["text"].strip()
         yield f"{i}\n{start_time} --> {end_time}\n{text}\n\n"
 
 
@@ -99,7 +99,7 @@ def vtt_writer(generator: Generator[dict[str, Any], Any, None]):
     for i, segment in enumerate(generator):
         start_time = format_timestamp(segment["start"])
         end_time = format_timestamp(segment["end"])
-        text = segment["text"]
+        text = segment["text"].strip()
         yield f"{start_time} --> {end_time}\n{text}\n\n"
 
 
