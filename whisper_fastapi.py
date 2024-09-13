@@ -127,7 +127,7 @@ def stream_builder(
         language=language,
         task=task,
         vad_filter=vad_filter,
-        initial_prompt=initial_prompt,
+        initial_prompt=initial_prompt if initial_prompt else None,
         word_timestamps=True,
         repetition_penalty=repetition_penalty,
     )
@@ -296,6 +296,7 @@ async def translateapi(
 
 
 @app.post("/v1/audio/transcriptions")
+@app.post("/v1/audio/translations")
 async def transcription(
     file: UploadFile = File(...),
     prompt: str = Form(""),
@@ -315,6 +316,7 @@ async def transcription(
         audio=io.BytesIO(file.file.read()),
         task=task,
         vad_filter=vad_filter,
+        initial_prompt=prompt,
         language=None if language == "und" else language,
         repetition_penalty=repetition_penalty,
     )
