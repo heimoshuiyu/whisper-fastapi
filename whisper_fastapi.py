@@ -298,10 +298,11 @@ async def translateapi(
 @app.post("/v1/audio/transcriptions")
 @app.post("/v1/audio/translations")
 async def transcription(
+    request: Request,
     file: UploadFile = File(...),
     prompt: str = Form(""),
     response_format: str = Form("json"),
-    task: str = Form("transcribe"),
+    task: str = Form(""),
     language: str = Form("und"),
     vad_filter: bool = Form(False),
     repetition_penalty: float = Form(1.0),
@@ -310,6 +311,14 @@ async def transcription(
 
     User upload audio file in multipart/form-data format and receive transcription in response
     """
+
+    if not task:
+        if request.url.path == '/v1/audio/transcriptions':
+            task = "transcribe"
+        elif request.url.path == '/v1/audio/translations':
+            task = "translate"
+        else:
+            raise HTTPException(400, "task parameter is required")
 
     # timestamp as filename, keep original extension
     generator, info = stream_builder(
