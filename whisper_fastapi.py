@@ -104,7 +104,7 @@ def vtt_writer(generator: Generator[dict[str, Any], Any, None]):
 
 
 def build_json_result(
-    generator: Iterable[Segment],
+    generator: Iterable[dict],
     info:  dict,
 ) -> dict[str, Any]:
     segments = [i for i in generator]
@@ -121,7 +121,7 @@ def stream_builder(
     language: str | None,
     initial_prompt: str = "",
     repetition_penalty: float = 1.0,
-) -> Tuple[Iterable[dict], dict]:
+) -> Tuple[Generator[dict, None, None], dict]:
     segments, info = transcriber.model.transcribe(
         audio=audio,
         language=language,
