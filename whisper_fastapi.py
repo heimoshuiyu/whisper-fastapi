@@ -126,6 +126,7 @@ def stream_builder(
         audio=audio,
         language=language,
         task=task,
+        vad_filter=vad_filter,
         initial_prompt=initial_prompt,
         word_timestamps=True,
         repetition_penalty=repetition_penalty,
