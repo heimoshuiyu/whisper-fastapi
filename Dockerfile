@@ -1,4 +1,4 @@
-FROM docker.io/nvidia/cuda:12.0.0-cudnn8-runtime-ubuntu22.04
+FROM nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04
 
 RUN apt-get update && \
     apt-get install -y ffmpeg python3 python3-pip git && \
