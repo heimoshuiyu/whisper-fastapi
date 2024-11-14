@@ -5,7 +5,7 @@ Whisper-FastAPI is a very simple Python FastAPI interface for konele and OpenAI 
 ## Features
 
 - **Translation and Transcription**: The application provides an API for konele service, where translations and transcriptions can be obtained by connecting over websockets or POST requests.
-- **Language Support**: If the target language is English, then the application will translate any source language to English.
+- **Language Support**: If no language is specified, the language will be automatically recognized from the first 30 seconds.
 - **Websocket and POST Method Support**: The project supports a websocket (`/konele/ws`) and a POST method to `/konele/post`.
 - **Audio Transcriptions**: The `/v1/audio/transcriptions` endpoint allows users to upload an audio file and receive transcription in response, with an optional `response_type` parameter. The `response_type` can be 'json', 'text', 'tsv', 'srt', and 'vtt'.
 - **Simplified Chinese**: The traditional Chinese will be automatically convert to simplified Chinese for konele using `opencc` library.
@@ -16,10 +16,10 @@ Whisper-FastAPI is a very simple Python FastAPI interface for konele and OpenAI 
 
 For konele voice typing, you can use either the websocket endpoint or the POST method endpoint.
 
-- **Websocket**: Connect to the websocket at `/konele/ws` and send audio data. The server will respond with the transcription or translation.
-- **POST Method**: Send a POST request to `/konele/post` with the audio data in the body. The server will respond with the transcription or translation.
+- **Websocket**: Connect to the websocket at `/konele/ws` (or `/v1/konele/ws`) and send audio data. The server will respond with the transcription or translation.
+- **POST Method**: Send a POST request to `/konele/post` (or `/v1/konele/post`) with the audio data in the body. The server will respond with the transcription or translation.
 
-You can also use the demo I have created to quickly test the effect at <https://yongyuancv.cn/konele/ws> and <https://yongyuancv.cn/konele/post>
+You can also use the demo I have created to quickly test the effect at <https://yongyuancv.cn/v1/konele/ws> and <https://yongyuancv.cn/v1/konele/post>
 
 ### OpenAI Whisper Service
 
