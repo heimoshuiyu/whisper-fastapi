@@ -9,7 +9,7 @@ coloredlogs==15.0.1
 ctranslate2==4.5.0
 exceptiongroup==1.2.2
 fastapi==0.115.5
-faster-whisper @ git+https://github.com/SYSTRAN/faster-whisper@3e0ba86571b9fe93bab2a25b3ff5af1be41014ec
+faster-whisper @ git+https://github.com/SYSTRAN/faster-whisper@98c1487ee46c3766086c312c0d93a875c0c4aa4c
 filelock==3.16.1
 flatbuffers==24.3.25
 fsspec==2024.10.0
