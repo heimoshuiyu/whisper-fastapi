@@ -107,15 +107,16 @@ class JsonResult(TranscriptionInfo):
     segments: list[Segment]
     text: str
 
+
 def build_json_result(
     generator: Iterable[Segment],
-    info:  TranscriptionInfo,
+    info: TranscriptionInfo,
 ) -> JsonResult:
     segments = [i for i in generator]
     return JsonResult(
         text="\n".join(i.text for i in segments),
         segments=segments,
-        **dataclasses.asdict(info)
+        **dataclasses.asdict(info),
     )
 
 
@@ -140,6 +141,7 @@ def stream_builder(
         "Detected language '%s' with probability %f"
         % (info.language, info.language_probability)
     )
+
     def wrap():
         for segment in segments:
             if info.language == "zh":
@@ -300,9 +302,9 @@ async def transcription(
     """
 
     if not task:
-        if request.url.path == '/v1/audio/transcriptions':
+        if request.url.path == "/v1/audio/transcriptions":
             task = "transcribe"
-        elif request.url.path == '/v1/audio/translations':
+        elif request.url.path == "/v1/audio/translations":
             task = "translate"
         else:
             raise HTTPException(400, "task parameter is required")
