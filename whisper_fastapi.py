@@ -141,13 +141,10 @@ def stream_builder(
         % (info.language, info.language_probability)
     )
     def wrap():
-        last_pos = 0
-        with tqdm.tqdm(total=info.duration, unit="seconds", disable=True) as pbar:
-            for segment in segments:
-                start, end, text = segment.start, segment.end, segment.text
-                pbar.update(end - last_pos)
-                last_pos = end
-                yield segment
+        for segment in segments:
+            if info.language == "zh":
+                segment.text = ccc.convert(segment.text)
+            yield segment
 
     return wrap(), info
 
