@@ -1,6 +1,6 @@
+import sys
 import dataclasses
 import faster_whisper
-import tqdm
 import json
 from fastapi.responses import StreamingResponse
 import wave
@@ -21,11 +21,15 @@ from fastapi import (
     WebSocket,
 )
 from fastapi.middleware.cors import CORSMiddleware
-from src.whisper_ctranslate2.whisper_ctranslate2 import Transcribe
 from src.whisper_ctranslate2.writers import format_timestamp
 from faster_whisper.transcribe import Segment, TranscriptionInfo
 import opencc
 from prometheus_fastapi_instrumentator import Instrumentator
+
+# redirect print to stderr
+_print = print
+def print(*args, **kwargs):
+    _print(*args, file=sys.stderr, **kwargs)
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--host", default="0.0.0.0", type=str)
@@ -95,7 +99,7 @@ def srt_writer(generator: Generator[Segment, Any, None]):
 
 def vtt_writer(generator: Generator[Segment, Any, None]):
     yield "WEBVTT\n\n"
-    for i, segment in enumerate(generator):
+    for _, segment in enumerate(generator):
         start_time = format_timestamp(segment.start)
         end_time = format_timestamp(segment.end)
         text = segment.text.strip()
