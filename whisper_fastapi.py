@@ -74,34 +74,40 @@ async def gpt_refine_text(
     ge: Generator[Segment, None, None], info: TranscriptionInfo, context: str
 ) -> str:
     text = build_json_result(ge, info).text.strip()
+    model = os.environ.get("OPENAI_LLM_MODEL", "gpt-4o-mini")
     if not text:
         return ""
-    async with aiohttp.ClientSession() as session:
-        async with session.post(
-            os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
-            + "/chat/completions",
-            json={
-                "model": os.environ.get("OPENAI_LLM_MODEL", "gpt-4o-mini"),
-                "temperature": 0.1,
-                "stream": False,
-                "messages": [
-                    {
-                        "role": "system",
-                        "content": f"""
-You are a audio transcription text refiner.
-You may refeer to the context to refine the transcription text.
+    body: dict = {
+        "model": model,
+        "temperature": 0.1,
+        "stream": False,
+        "messages": [
+            {
+                "role": "system",
+                "content": f"""
+You are a audio transcription text refiner. You may refer to the context to correct the transcription text. 
+Your task is to correct the transcribed text by removing redundant and repetitive words, resolving any contradictions, and fixing punctuation errors.
+Keep my spoken language as it is, and do not change my speaking style. Only fix the text.
+Response directly with the text.
                     """.strip(),
-                    },
-                    {
-                        "role": "user",
-                        "content": f"""
+            },
+            {
+                "role": "user",
+                "content": f"""
 context: {context}
 ---
 transcription: {text}
                      """.strip(),
-                    },
-                ],
             },
+        ],
+    }
+    print(f"Refining text length: {len(text)} with {model}")
+    print(body)
+    async with aiohttp.ClientSession() as session:
+        async with session.post(
+            os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
+            + "/chat/completions",
+            json=body,
             headers={
                 "Authorization": f'Bearer {os.environ["OPENAI_API_KEY"]}',
             },
