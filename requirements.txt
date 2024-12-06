@@ -6,3 +6,4 @@ opencc
 prometheus-fastapi-instrumentator
 git+https://github.com/heimoshuiyu/faster-whisper@a759f5f48f5ef5b79461a6461966eafe9df088a9
 pydub
+aiohttp

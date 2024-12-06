@@ -10,6 +10,19 @@ Whisper-FastAPI is a very simple Python FastAPI interface for konele and OpenAI 
 - **Audio Transcriptions**: The `/v1/audio/transcriptions` endpoint allows users to upload an audio file and receive transcription in response, with an optional `response_type` parameter. The `response_type` can be 'json', 'text', 'tsv', 'srt', and 'vtt'.
 - **Simplified Chinese**: The traditional Chinese will be automatically convert to simplified Chinese for konele using `opencc` library.
 
+## GPT Refine Result
+
+You can choose to use the OpenAI GPT model for post-processing transcription results. You can also provide context to GPT to allow it to modify the text based on your context.
+
+Set the environment variables `OPENAI_BASE_URL=https://api.openai.com/v1` and `OPENAI_API_KEY=your-sk` to enable this feature.
+
+When the client sends a request with `gpt_refine=True`, this feature will be activated. Specifically:
+
+- For `/v1/audio/transcriptions`, submit using `curl <api_url> -F file=audio.mp4 -F gpt_refine=True`.
+- For `/v1/konele/ws` and `/v1/konele/post`, use the URL format `/v1/konele/ws/gpt_refine`.
+
+The default model is `gpt-4o-mini`. You can easily edit the code to change the or LLM's prompt to better fit your workflow. It's just a few lines of code. Give it a try, it's very simple!
+
 ## Usage
 
 ### Konele Voice Typing
@@ -19,7 +32,7 @@ For konele voice typing, you can use either the websocket endpoint or the POST m
 - **Websocket**: Connect to the websocket at `/konele/ws` (or `/v1/konele/ws`) and send audio data. The server will respond with the transcription or translation.
 - **POST Method**: Send a POST request to `/konele/post` (or `/v1/konele/post`) with the audio data in the body. The server will respond with the transcription or translation.
 
-You can also use the demo I have created to quickly test the effect at <https://yongyuancv.cn/v1/konele/ws> and <https://yongyuancv.cn/v1/konele/post>
+You can also use the demo I have created to quickly test the effect at <https://yongyuancv.cn/v1/konele/post>
 
 ### OpenAI Whisper Service
 
