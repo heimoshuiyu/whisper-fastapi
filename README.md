@@ -21,7 +21,9 @@ When the client sends a request with `gpt_refine=True`, this feature will be act
 - For `/v1/audio/transcriptions`, submit using `curl <api_url> -F file=audio.mp4 -F gpt_refine=True`.
 - For `/v1/konele/ws` and `/v1/konele/post`, use the URL format `/v1/konele/ws/gpt_refine`.
 
-The default model is `gpt-4o-mini`. You can easily edit the code to change the or LLM's prompt to better fit your workflow. It's just a few lines of code. Give it a try, it's very simple!
+The default model is `gpt-4o-mini` set by environment variable `OPENAI_LLM_MODEL`.
+
+You can easily edit the code LLM's prompt to better fit your workflow. It's just a few lines of code. Give it a try, it's very simple!
 
 ## Usage
 

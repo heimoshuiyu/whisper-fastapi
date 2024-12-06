@@ -81,7 +81,7 @@ async def gpt_refine_text(
             os.environ.get("OPENAI_BASE_URL", "https://api.openai.com/v1")
             + "/chat/completions",
             json={
-                "model": "gpt-4o-mini",
+                "model": os.environ.get("OPENAI_LLM_MODEL", "gpt-4o-mini"),
                 "temperature": 0.1,
                 "stream": False,
                 "messages": [
