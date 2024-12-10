@@ -37,6 +37,19 @@ For konele voice typing, you can use either the websocket endpoint or the POST m
 
 You can also use the demo I have created to quickly test the effect at <https://yongyuancv.cn/v1/konele/post>
 
+## Home Assistant Service
+
+By default it listen to `tcp://0.0.0.0:3001` for wyoming protocol. You can specify `--wyoming-uri tcp://0.0.0.0:3001` to modify it. 
+
+Beside the main program `whisper_fastapi.py`, there is another script `wyoming-forward.py` which provides the same Wyoming API, but instead of transcribing audio with a local model, it forwards the audio request to any OpenAI-compatible endpoint. For example:
+
+```bash
+pip install wyoming aiohttp  # There are only two dependencies.
+export OPENAI_API_KEY=your-secret-key
+export OPENAI_BASE_URL=https://api.openai.com/v1  # this is the default
+python wyoming-forward.py --wyoming-uri tcp://0.0.0.0:3001
+```
+
 ### OpenAI Whisper Service
 
 To use the service that matches the structure of the OpenAI Whisper service, send a POST request to `/v1/audio/transcriptions` with an audio file. The server will respond with the transcription in the format specified by the `response_type` parameter.
