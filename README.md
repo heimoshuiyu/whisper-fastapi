@@ -37,7 +37,7 @@ For konele voice typing, you can use either the websocket endpoint or the POST m
 
 You can also use the demo I have created to quickly test the effect at <https://yongyuancv.cn/v1/konele/post>
 
-## Home Assistant Service
+### Home Assistant Service
 
 By default it listen to `tcp://0.0.0.0:3001` for wyoming protocol. You can specify `--wyoming-uri tcp://0.0.0.0:3001` to modify it. 
 
