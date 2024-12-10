@@ -1,3 +1,6 @@
+import asyncio
+from functools import partial
+from contextlib import asynccontextmanager
 import aiohttp
 import os
 import sys
@@ -25,8 +28,15 @@ from fastapi import (
 from fastapi.middleware.cors import CORSMiddleware
 from src.whisper_ctranslate2.writers import format_timestamp
 from faster_whisper.transcribe import Segment, TranscriptionInfo
+from faster_whisper.tokenizer import _LANGUAGE_CODES
 import opencc
 from prometheus_fastapi_instrumentator import Instrumentator
+from wyoming.server import AsyncEventHandler, AsyncServer, partial
+from wyoming.event import Event
+from wyoming.audio import AudioChunk, AudioStop
+from wyoming.asr import Transcribe, Transcript
+from wyoming.info import Describe, Info
+from wyoming.info import AsrModel, AsrProgram, Attribution, Info
 
 # redirect print to stderr
 _print = print
@@ -38,6 +48,7 @@ def print(*args, **kwargs):
 
 parser = argparse.ArgumentParser()
 parser.add_argument("--host", default="0.0.0.0", type=str)
+parser.add_argument("--wyoming-uri", default="tcp://0.0.0.0:3001", type=str)
 parser.add_argument("--port", default=5000, type=int)
 parser.add_argument("--model", default="large-v3", type=str)
 parser.add_argument("--device", default="auto", type=str)
@@ -45,7 +56,19 @@ parser.add_argument("--cache_dir", default=None, type=str)
 parser.add_argument("--local_files_only", default=False, type=bool)
 parser.add_argument("--threads", default=4, type=int)
 args = parser.parse_args()
-app = FastAPI()
+
+
+# for home assistant wyoming server
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    server = AsyncServer.from_uri(args.wyoming_uri)
+    print(f"Running wyoming server at {args.wyoming_uri}")
+    asyncio.create_task(server.run(partial(Handler)))
+    yield
+
+
+app = FastAPI(lifespan=lifespan)
+
 # Instrument your app with default metrics and expose the metrics
 Instrumentator().instrument(app).expose(app, endpoint="/konele/metrics")
 ccc = opencc.OpenCC("t2s.json")
@@ -410,6 +433,100 @@ async def transcription(
         return StreamingResponse(vtt_writer(generator), media_type="text/plain")
 
     raise HTTPException(400, "Invailed response_format")
+
+
+# for home assitant
+# code from https://github.com/rhasspy/wyoming-faster-whisper
+class Handler(AsyncEventHandler):
+    file_obj: io.BytesIO | None = None
+    wav_file: wave.Wave_write | None = None
+    lang: str | None = None
+
+    async def handle_event(self, event: Event) -> bool:
+        if AudioChunk.is_type(event.type):
+            chunk = AudioChunk.from_event(event)
+
+            if self.wav_file is None:
+                print("AudioChunk begin")
+                self.file_obj = io.BytesIO()
+                self.wav_file = wave.open(self.file_obj, "wb")
+                self.wav_file.setframerate(chunk.rate)
+                self.wav_file.setsampwidth(chunk.width)
+                self.wav_file.setnchannels(chunk.channels)
+
+            self.wav_file.writeframes(chunk.audio)
+            return True
+
+        if AudioStop.is_type(event.type):
+            print("AudioStop")
+            assert self.wav_file is not None
+            assert self.file_obj is not None
+            self.wav_file.close()
+            self.wav_file = None
+            self.file_obj.seek(0)
+
+            form = aiohttp.FormData()
+            form.add_field("file", self.file_obj, filename="audio.wav")
+            form.add_field("model", "whisper-1")
+            form.add_field("response_format", "text")
+
+            generator, info = stream_builder(
+                audio=self.file_obj,
+                task="transcribe",
+                vad_filter=False,
+                language=self.lang,
+            )
+            text = build_json_result(generator, info).text
+            print(text)
+            await self.write_event(Transcript(text=text).event())
+
+            self.lang = None
+            return False
+
+        if Transcribe.is_type(event.type):
+            print("Transcribe")
+            transcribe = Transcribe.from_event(event)
+            if transcribe.language:
+                self.lang = transcribe.language
+
+            return True
+
+        if Describe.is_type(event.type):
+            print("Describe")
+            await self.write_event(
+                Info(
+                    asr=[
+                        AsrProgram(
+                            name="whisper-forward",
+                            description="Whisper forward to OpenAI API endpoint",
+                            attribution=Attribution(
+                                name="heimoshuiyu",
+                                url="https://github.com/heimoshuiyu/whisper-fastapi",
+                            ),
+                            installed=True,
+                            version="0.1",
+                            models=[
+                                AsrModel(
+                                    name="whisper-1",
+                                    description="whisper-1",
+                                    attribution=Attribution(
+                                        name="Systran",
+                                        url="https://huggingface.co/Systran",
+                                    ),
+                                    installed=True,
+                                    languages=list(
+                                        _LANGUAGE_CODES
+                                    ),  # pylint: disable=protected-access
+                                    version="0.1",
+                                )
+                            ],
+                        )
+                    ],
+                ).event()
+            )
+            return True
+
+        return True
 
 
 uvicorn.run(app, host=args.host, port=args.port)

@@ -5,7 +5,7 @@ annotated-types==0.7.0
 anyio==4.7.0
 async-timeout==5.0.1
 attrs==24.2.0
-av==14.0.0
+av==14.0.1
 certifi==2024.8.30
 cffi==1.17.1
 charset-normalizer==3.4.0
@@ -21,12 +21,12 @@ frozenlist==1.5.0
 fsspec==2024.10.0
 h11==0.14.0
 httptools==0.6.4
-huggingface-hub==0.26.3
+huggingface-hub==0.26.5
 humanfriendly==10.0
 idna==3.10
 mpmath==1.3.0
 multidict==6.1.0
-numpy==2.1.3
+numpy==2.2.0
 onnxruntime==1.20.1
 OpenCC==1.1.9
 packaging==24.2
@@ -52,7 +52,8 @@ typing_extensions==4.12.2
 urllib3==2.2.3
 uvicorn==0.32.1
 uvloop==0.21.0
-watchfiles==1.0.0
+watchfiles==1.0.1
 websockets==14.1
 whisper-ctranslate2==0.5.0
+wyoming==1.6.0
 yarl==1.18.3

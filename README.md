@@ -6,7 +6,8 @@ Whisper-FastAPI is a very simple Python FastAPI interface for konele and OpenAI 
 
 - **Translation and Transcription**: The application provides an API for konele service, where translations and transcriptions can be obtained by connecting over websockets or POST requests.
 - **Language Support**: If no language is specified, the language will be automatically recognized from the first 30 seconds.
-- **Websocket and POST Method Support**: The project supports a websocket (`/konele/ws`) and a POST method to `/konele/post`.
+- **Konele Support**: Konele (or k6nele) is an open-source voice typing application on Android. This project supports a websocket (`/konele/ws`) and a POST method to `/konele/post`.
+- **Home Assistant Support**: By default it listen to `tcp://0.0.0.0:3001` for wyoming protocol.
 - **Audio Transcriptions**: The `/v1/audio/transcriptions` endpoint allows users to upload an audio file and receive transcription in response, with an optional `response_type` parameter. The `response_type` can be 'json', 'text', 'tsv', 'srt', and 'vtt'.
 - **Simplified Chinese**: The traditional Chinese will be automatically convert to simplified Chinese for konele using `opencc` library.
 
