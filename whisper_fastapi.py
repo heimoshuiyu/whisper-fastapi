@@ -465,11 +465,6 @@ class Handler(AsyncEventHandler):
             self.wav_file = None
             self.file_obj.seek(0)
 
-            form = aiohttp.FormData()
-            form.add_field("file", self.file_obj, filename="audio.wav")
-            form.add_field("model", "whisper-1")
-            form.add_field("response_format", "text")
-
             generator, info = stream_builder(
                 audio=self.file_obj,
                 task="transcribe",
