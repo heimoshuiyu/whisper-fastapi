@@ -76,6 +76,23 @@ python whisper_fastapi.py --host 0.0.0.0 --port 5000 --model large-v2
 
 This will start the application on `http://<your-ip-address>:5000`.
 
+### Deploy with docker
+
+```bash
+docker run -d \
+    --tmpfs /tmp \
+    -v ~/.cache/huggingface:/root/.cache/huggingface \
+    --gpus all --device nvidia.com/gpu=all --security-opt=label=disable \
+    -e OPENAI_BASE_URL=https://api.openai.com/v1 -e OPENAI_API_KEY=key -d OPENAI_LLM_MODEL=gpt-4o \
+    -p 5000:5000 -p 3001:3001 \
+    docker.io/heimoshuiyu/whisper-fastapi:latest \
+    --model large-v2
+```
+
+The `--gpus all` flag indicates that all GPUs are passed to the container. You might want to specify which GPU to use by setting `--gpus 0` or `--gpus 1`. 
+
+The `OPENAI_*` related environment variables are used for the GPT refine feature. If you are not using the GPT refine feature, you can ignore these environment variables.
+
 ## Limitation
 
 Defect: Due to the synchronous nature of inference, this API can actually only handle one request at a time.
