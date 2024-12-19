@@ -76,6 +76,32 @@ python whisper_fastapi.py --host 0.0.0.0 --port 5000 --model large-v2
 
 This will start the application on `http://<your-ip-address>:5000`.
 
+### Voice Typing Script
+
+> This script currently supports Linux and macOS. If you're familiar with Windows, feel free to contribute via a PR!
+
+
+1. Grant execution permissions to the `voice-typing` script using the command:
+   ```bash
+   chmod +x voice-typing
+   ```
+
+2. Optionally, place the script in a directory included in your system's PATH, such as `/usr/bin/`. This step is not mandatory.
+
+3. Bind a keyboard shortcut to execute this script in your KDE or Gnome settings.
+
+How it works
+
+- **First Execution**: When you run the script for the first time, it creates a PID file in the `/tmp` directory and starts recording audio from your microphone.
+
+- **Second Execution**: Running the script again will send a termination signal to the recording process using the PID file. This stops the recording and initiates the transcription process via an API. The transcribed text is then saved to your clipboard.
+
+Whisper can improve transcription accuracy based on **context**. For:
+
+- **macOS and Wayland**: The script uses the current clipboard content as context.
+
+- **X11 Environment**: The script uses the text selected by the mouse as context for transcription.
+
 ### Deploy with docker
 
 ```bash

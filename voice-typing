@@ -1,0 +1,106 @@
+#!/bin/bash
+
+# Define the path for the PID file and the temporary audio file
+PID_FILE="/tmp/ffmpeg_audio_recording.pid"
+TEMP_FILE="/tmp/audio_recording.ogg"
+
+# Define the API endpoint and authorization token
+API_ENDPOINT="http://127.0.0.1:5000/v1/audio/transcriptions"
+AUTH_TOKEN="your_auth_token_here"
+
+# Function to send notifications
+send_notification() {
+    local message="$1"
+    if [ "$(uname)" == "Darwin" ]; then
+        # macOS notification
+        osascript -e "display notification \"$message\" with title \"Audio Script\""
+    else
+        # Linux notification
+        notify-send "Audio Script" "$message"
+    fi
+}
+
+# Function to check and kill existing FFmpeg process
+check_and_kill_ffmpeg() {
+    if [ -f "$PID_FILE" ]; then
+        # PID file exists, read the PID
+        PID=$(cat "$PID_FILE")
+        if ps -p $PID > /dev/null 2>&1; then
+            # Process is running, kill it
+            echo "Stopping existing FFmpeg process (PID: $PID)..."
+            kill $PID
+            exit 0
+        else
+            # Process not running, remove the PID file
+            echo "Removing stale PID file."
+            rm "$PID_FILE"
+        fi
+    fi
+}
+
+# Function to get selected text
+get_selected_text() {
+    if [ "$(uname)" == "Darwin" ]; then
+        SELECTED_TEXT=$(pbpaste)
+    elif [ "$XDG_SESSION_TYPE" == "x11" ]; then
+        SELECTED_TEXT=$(xclip -o)
+    elif [ "$XDG_SESSION_TYPE" == "wayland" ]; then
+        SELECTED_TEXT=$(wl-paste)
+    else
+        echo "Unsupported session type for capturing selected text."
+        SELECTED_TEXT=""
+    fi
+    echo "$SELECTED_TEXT"
+}
+
+# Function to copy text to clipboard
+copy_to_clipboard() {
+    local text="$1"
+    if [ "$(uname)" == "Darwin" ]; then
+        echo "$text" | pbcopy
+    elif [ "$XDG_SESSION_TYPE" == "x11" ]; then
+        echo "$text" | xclip -selection clipboard
+    elif [ "$XDG_SESSION_TYPE" == "wayland" ]; then
+        echo "$text" | wl-copy
+    else
+        echo "Unsupported session type for clipboard operations."
+    fi
+}
+
+# Call the function to check and potentially kill an existing FFmpeg process
+check_and_kill_ffmpeg
+
+# Start recording audio with ffmpeg, outputting to the temporary file
+echo "Recording... Press Ctrl+C to stop."
+send_notification "Recording..."
+if [ "$(uname)" == "Darwin" ]; then
+    ffmpeg -y -f avfoundation -i ":0" -c:a libopus -ac 1 -ar 16000 -f ogg "$TEMP_FILE" &
+else
+    ffmpeg -y -f pulse -i 0 -c:a libopus -ac 1 -ar 16000 -f ogg "$TEMP_FILE" &
+fi
+FFMPEG_PID=$!
+
+# Save the FFmpeg PID to the PID file
+echo $FFMPEG_PID > "$PID_FILE"
+
+# Wait for FFmpeg to finish
+wait $FFMPEG_PID
+
+# Get the selected text to use as the prompt parameter
+PROMPT=$(get_selected_text)
+
+# Proceed to upload the audio file to the API endpoint using curl
+echo "Transcribing..."
+send_notification "Transcribing..."
+API_RESPONSE=$(curl "$API_ENDPOINT" -X POST -F file=@"$TEMP_FILE;filename=input.ogg" \
+     -H "Authorization: Bearer $AUTH_TOKEN" -F response_format=text -F prompt="$PROMPT" \
+     -F gpt_refine=True)
+
+# Copy the API response to the clipboard
+copy_to_clipboard "$API_RESPONSE"
+
+# Remove the PID file at the end of the script
+rm "$PID_FILE"
+
+send_notification "$API_RESPONSE"
+echo "Done."
