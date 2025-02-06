@@ -9,12 +9,23 @@ import faster_whisper
 import json
 from fastapi.responses import PlainTextResponse, StreamingResponse
 import wave
+from faster_whisper.vad import VadOptions
 import pydub
 import io
 import hashlib
 import argparse
 import uvicorn
-from typing import Annotated, Any, BinaryIO, Literal, Generator, Tuple, Iterable, Union
+from typing import (
+    Annotated,
+    Any,
+    BinaryIO,
+    Literal,
+    Generator,
+    Optional,
+    Tuple,
+    Iterable,
+    Union,
+)
 from fastapi import (
     File,
     HTTPException,
@@ -204,6 +215,7 @@ def stream_builder(
     language: str | None,
     initial_prompt: str = "",
     repetition_penalty: float = 1.0,
+    vad_options: Optional[VadOptions] = None,
 ) -> Tuple[Generator[Segment, None, None], TranscriptionInfo]:
     segments, info = model.transcribe(
         audio=audio,
@@ -213,6 +225,7 @@ def stream_builder(
         initial_prompt=initial_prompt if initial_prompt else None,
         word_timestamps=True,
         repetition_penalty=repetition_penalty,
+        vad_parameters=vad_options,
     )
     print(
         "Detected language '%s' with probability %f"
@@ -387,6 +400,12 @@ async def transcription(
     task: str = Form(""),
     language: str = Form("und"),
     vad_filter: bool = Form(False),
+    vad_threshold: Optional[float] = Form(None),
+    vad_neg_threshold: Optional[float] = Form(None),
+    vad_min_speech_duration_ms: Optional[int] = Form(None),
+    vad_max_speech_duration_s: Optional[float] = Form(None),
+    vad_min_silence_duration_ms: Optional[int] = Form(None),
+    vad_speech_pad_ms: Optional[int] = Form(None),
     repetition_penalty: float = Form(1.0),
     gpt_refine: bool = Form(False),
 ):
@@ -403,6 +422,20 @@ async def transcription(
         else:
             raise HTTPException(400, "task parameter is required")
 
+    vad_options = VadOptions()
+    if vad_threshold is not None:
+        vad_options.threshold = vad_threshold
+    if vad_neg_threshold is not None:
+        vad_options.neg_threshold = vad_neg_threshold
+    if vad_min_speech_duration_ms is not None:
+        vad_options.min_speech_duration_ms = vad_min_speech_duration_ms
+    if vad_max_speech_duration_s is not None:
+        vad_options.max_speech_duration_s = vad_max_speech_duration_s
+    if vad_min_silence_duration_ms is not None:
+        vad_options.min_silence_duration_ms = vad_min_silence_duration_ms
+    if vad_speech_pad_ms is not None:
+        vad_options.speech_pad_ms = vad_speech_pad_ms
+
     # timestamp as filename, keep original extension
     generator, info = stream_builder(
         audio=io.BytesIO(file.file.read()),
@@ -411,6 +444,7 @@ async def transcription(
         initial_prompt=prompt,
         language=None if language == "und" else language,
         repetition_penalty=repetition_penalty,
+        vad_options=vad_options,
     )
 
     # special function for streaming response (OpenAI API does not have this)
