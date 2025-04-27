@@ -109,7 +109,7 @@ docker run -d \
     --tmpfs /tmp \
     -v ~/.cache/huggingface:/root/.cache/huggingface \
     --gpus all --device nvidia.com/gpu=all --security-opt=label=disable \
-    -e OPENAI_BASE_URL=https://api.openai.com/v1 -e OPENAI_API_KEY=key -d OPENAI_LLM_MODEL=gpt-4o \
+    -e OPENAI_BASE_URL=https://api.openai.com/v1 -e OPENAI_API_KEY=key -e OPENAI_LLM_MODEL=gpt-4o \
     -p 5000:5000 -p 3001:3001 \
     docker.io/heimoshuiyu/whisper-fastapi:latest \
     --model large-v2
